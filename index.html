@@ -272,6 +272,7 @@
   #intro h1{ font-weight:300; font-size:clamp(34px,8vw,58px); letter-spacing:.42em; margin:0 0 0 .42em; color:#fff1d2; text-shadow:0 0 40px rgba(240,190,110,.55); }
   #intro h2{ font-family:Georgia,serif; font-weight:400; font-size:13px; letter-spacing:.42em; color:var(--gold-dim); margin:16px 0 24px; }
   #intro p{ font-size:14px; line-height:2.2; letter-spacing:.2em; color:rgba(214,226,245,.7); margin:0 0 36px; }
+  #intro #visits{ font-size:12.5px; letter-spacing:.18em; color:rgba(233,220,196,.6); margin:-22px 0 30px; min-height:1.2em; } #intro #visits b{ color:#f3d9a4; font-weight:500; margin:0 .15em; } #intro.dressing #visits{ display:none; }
   #intro .rule{ width:min(360px,72vw); height:1px; background:linear-gradient(90deg,rgba(201,164,106,0),rgba(201,164,106,.75) 18%,rgba(201,164,106,.75) 82%,rgba(201,164,106,0)); margin:0 0 26px; }
   #intro h3{ font-weight:400; font-size:clamp(19px,4.6vw,26px); letter-spacing:.24em; margin:0 0 10px .24em; color:#f6ead2; }
   #intro p{ font-size:clamp(13px,3.4vw,15px); letter-spacing:.16em; color:rgba(233,220,196,.78); margin:0 0 34px; }
@@ -352,6 +353,7 @@
   <h1>島嶼微光</h1><h2>ISLAND OF LIGHT</h2><div class="rule"></div>
   <h3>一座收藏生命記憶的島</h3>
   <p>每一個被記得的生命，都有自己的光。</p>
+  <div id="visits"></div>
   <button id="enter">走進園區</button>
   <div id="dress"><div class="dt">打扮小光</div>
     <div class="row"><span>披風</span><div class="opts" data-k="cloak"></div></div>
@@ -511,8 +513,15 @@ const CLOUD = FB_CFG ? await (async()=>{
     C.kind=()=>{ const u=C.user; if(!u) return ''; if(u.isAnonymous) return 'anon'; if(/^kl-.*@code\.kinmen-light\.app$/.test(u.email||'')) return 'code';
       if((u.providerData||[]).some(p=>p.providerId==='google.com')) return 'google'; return 'email'; };
     C.touch=async force=>{ if(!C.uid) return; const d=dayNum(), k=C.kind(); if(!force&&C.profile.seenDay===d&&C.profile.kind===k) return;
-      const v={ kind:k, seenDay:d, lastSeen:Date.now() }; if(!C.profile.created) v.created=Date.now();
-      try{ await F.setDoc(F.doc(db,'users',C.uid),v,{ merge:true }); Object.assign(C.profile,v); }catch(e){ console.warn('touch',e); } };
+      const v={ kind:k, seenDay:d, lastSeen:Date.now() }, isNew=!C.profile.created, newDay=C.profile.seenDay!==d; if(isNew) v.created=Date.now();
+      // 公開的來訪人數：第一次來的身分讓「累計」+1；每天第一次來讓「今天」+1（規則會檢查，不能重複加）
+      const b=F.writeBatch(db); b.set(F.doc(db,'users',C.uid),v,{ merge:true });
+      if(isNew) b.set(F.doc(db,'stats','global'),{ visitors:F.increment(1) },{ merge:true });
+      if(newDay) b.set(F.doc(db,'stats','day_'+d),{ n:F.increment(1), d },{ merge:true });
+      try{ await b.commit(); Object.assign(C.profile,v); }
+      catch(e){ console.warn('touch',e); try{ await F.setDoc(F.doc(db,'users',C.uid),v,{ merge:true }); Object.assign(C.profile,v); }catch(e2){} } };
+    C.publicStats=async()=>{ const g=async id=>{ try{ const s=await F.getDoc(F.doc(db,'stats',id)); return s.exists()?s.data():{}; }catch(e){ return null; } };
+      const [a,t]=await Promise.all([g('global'),g('day_'+dayNum())]); return { total:a?(a.visitors||0):null, today:t?(t.n||0):null }; };
     // 訪客升級成正式帳號（同一個身分，之前的問候、獻花都保留）
     C.afterLink=async()=>{ setUser(auth.currentUser); await C.loadMe(); await C.touch(true); await C.refreshPriv(); C.authCb.forEach(f=>f()); };
     C.stats=async()=>{ const col=F.collection(db,'users'), cnt=async q=>{ try{ return (await F.getCountFromServer(q)).data().count; }catch(e){ console.warn('count',e); return null; } };
@@ -555,7 +564,7 @@ const CLOUD = FB_CFG ? await (async()=>{
       return { code:`KL-${g[0]}-${g[1]}-${g[2]}`, email:`kl-${(g[0]+g[1]).toLowerCase()}@code.kinmen-light.app`, pw:`${g[2]}-${g[0]}${g[1]}` }; };
     C.newCode=async()=>{ for(let t=0;t<4;t++){ const a=C.codeAcct(randCode(12));
         try{ if(auth.currentUser&&auth.currentUser.isAnonymous){ await U.linkWithCredential(auth.currentUser,U.EmailAuthProvider.credential(a.email,a.pw)); await F.setDoc(F.doc(db,'users',auth.currentUser.uid),{ code:a.code },{ merge:true }); await C.afterLink(); C.profile.code=a.code; return a.code; }
-          const cr=await U.createUserWithEmailAndPassword(auth,a.email,a.pw); setUser(cr.user); await F.setDoc(F.doc(db,'users',cr.user.uid),{ code:a.code, created:Date.now() },{ merge:true }); C.profile={ ...C.profile, code:a.code }; C.touch(true); return a.code; }
+          const cr=await U.createUserWithEmailAndPassword(auth,a.email,a.pw); setUser(cr.user); await F.setDoc(F.doc(db,'users',cr.user.uid),{ code:a.code },{ merge:true }); C.profile={ ...C.profile, code:a.code }; C.touch(true); return a.code; }
         catch(e){ if(e.code!=='auth/email-already-in-use') throw e; } } throw new Error('code'); };
     C.signCode=async code=>{ const a=C.codeAcct(code); if(!a) throw { code:'kl/format' }; await U.signInWithEmailAndPassword(auth,a.email,a.pw); };
     C.signGoogle=async()=>{ const pv=new U.GoogleAuthProvider(); pv.setCustomParameters({ prompt:'select_account' });
@@ -776,6 +785,7 @@ const BENCHES = [
   { x:-10.04,z:-10.18,look:'KM-0022' },
 ];
 const colliders = [];   // {x,z,r}
+let BENCH_WOOD=null, BENCH_PAD=null;
 
 /* ══════════════ 2b. 第二座島：微光小島（主島＋燈塔小島＋花之小島），與雲海拱門以「雲上長橋」互通 ══════════════
    小島整組放在雲海拱門的東邊，像另一座漂在雲海上的微縮模型：圓形海盆、陶土邊框、自己的海與浪花。
@@ -2578,17 +2588,24 @@ const SP = MEMORIALS.map(m=>m.pos);
 /* ══════════════ 13. 木製長椅（單一 InstancedMesh） ══════════════ */
 {
   const wood=[];
-  for(const b of BENCHES){
+  for(const b of BENCHES){ b._w0=wood.length;
     _d.position.set(b.x,b.gy,b.z); _d.rotation.set(0,b.heading,0); _d.scale.set(1,1,1); _d.updateMatrix(); const P=_d.matrix.clone();
     const c=()=>shade(0x6b4b34,rr(.85,1.12));
     for(const z of [-.14,.02,.18]) wood.push({ m:localMatrix(P,0,.46,z,1.6,.045,.14), c:c() });        // 座板
     for(const y of [.68,.86])     wood.push({ m:localMatrix(P,0,y,-.27+(y-.68)*-.2,1.6,.13,.04,-.16), c:c() }); // 椅背
     for(const x of [-.7,.7]){ wood.push({ m:localMatrix(P,x,.23,.16,.07,.46,.07), c:c() }); wood.push({ m:localMatrix(P,x,.47,-.24,.07,.94,.07,-.12), c:c() }); wood.push({ m:localMatrix(P,x,.6,-.02,.07,.05,.5), c:c() }); }
-  }
-  instanced(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({ roughness:.9, bumpMap:bumpTex(_bumpClay,2,1), bumpScale:.8 }),wood,{cast:true,receive:true});
-  const pads=BENCHES.filter(b=>b.pad).map(b=>({ p:[b.x,b.gy-b.pad/2+0.02,b.z], r:[0,b.heading,0], s:[2.3,b.pad,1.35], c:shade(0xd8ccb9,rr(.9,1.05)) }));
-  instanced(new RoundedBoxGeometry(1,1,1,2,0.08),new THREE.MeshStandardMaterial({ roughness:.92 }),pads,{cast:true,receive:true});
+    b._w1=wood.length; }
+  BENCH_WOOD=instanced(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({ roughness:.9, bumpMap:bumpTex(_bumpClay,2,1), bumpScale:.8 }),wood,{cast:true,receive:true});
+  const padB=BENCHES.filter(b=>b.pad); padB.forEach((b,i)=>b._pad=i);
+  const pads=padB.map(b=>({ p:[b.x,b.gy-b.pad/2+0.02,b.z], r:[0,b.heading,0], s:[2.3,b.pad,1.35], c:shade(0xd8ccb9,rr(.9,1.05)) }));
+  BENCH_PAD=instanced(new RoundedBoxGeometry(1,1,1,2,0.08),new THREE.MeshStandardMaterial({ roughness:.92 }),pads,{cast:true,receive:true});
 }
+// 拿掉一張原本的長椅（和水晶前的矮長凳重疊時用）：把它的木條縮成 0，並移出長椅清單與碰撞
+function removeOldBench(b){ const Z=new THREE.Matrix4().makeScale(0,0,0);
+  if(BENCH_WOOD&&b._w1>b._w0){ for(let i=b._w0;i<b._w1;i++) BENCH_WOOD.setMatrixAt(i,Z); BENCH_WOOD.instanceMatrix.needsUpdate=true; }
+  if(BENCH_PAD&&b._pad!=null){ BENCH_PAD.setMatrixAt(b._pad,Z); BENCH_PAD.instanceMatrix.needsUpdate=true; }
+  const i=BENCHES.indexOf(b); if(i>=0) BENCHES.splice(i,1);
+  const k=colliders.findIndex(c=>c.bench&&c.x===b.x&&c.z===b.z); if(k>=0) colliders.splice(k,1); }
 
 /* ══════════════ 14. 光體系統 ══════════════ */
 const NOISE = `
@@ -4543,12 +4560,17 @@ function makeSlot(id,pos){ const sp=createSpirit({ id, pos, kind:'person' }); sp
   MEM.buildSlots(Math.max(0,500-pts.length));   // 雲海拱門＋四座紀念島，一共 500 個紀念位置
   for(const s of spirits) applyTrib(s);
   // 每顆水晶前方一張矮長凳：小光坐上去時面向水晶、頭望著它
-  { const seats=[], legs=[], o=new THREE.Object3D(), SEAT_H=0.3, add=(id,x,z,face)=>{ const bx=x+Math.sin(face)*2.7, bz=z+Math.cos(face)*2.7; if(!walkW(bx,bz)) return;
+  { const seats=[], legs=[], o=new THREE.Object3D(), SEAT_H=0.3, report={ removedOld:[], skippedLow:[] }, add=(id,x,z,face)=>{ const bx=x+Math.sin(face)*2.7, bz=z+Math.cos(face)*2.7; if(!walkW(bx,bz)) return;
+      // 盤點重疊：原本的長椅和這張矮長凳太近（3.5 以內，或離水晶 3 以內）→ 拿掉原本的；兩顆水晶的矮長凳互相重疊 → 後面這張不放
+      const lowHit=BENCHES.find(b=>b.low&&Math.hypot(b.x-bx,b.z-bz)<1.9); if(lowHit){ report.skippedLow.push(id); return; }
+      for(const b of BENCHES.filter(b=>!b.low&&(Math.hypot(b.x-bx,b.z-bz)<3.5||Math.hypot(b.x-x,b.z-z)<3.0))){ report.removedOld.push(`${b.x},${b.z}`); removeOldBench(b); }
       const heading=face+Math.PI, gy=groundY(bx,bz); BENCHES.push({ x:bx, z:bz, look:id, heading, gy:gy-0.16, low:true });
       o.position.set(bx,gy+SEAT_H,bz); o.rotation.set(0,heading,0); o.scale.set(1.25,0.07,0.34); o.updateMatrix(); seats.push({ m:o.matrix.clone(), c:new THREE.Color().setHSL(0.07,0.38,0.42+Math.random()*0.06) });
       for(const sd of [-1,1]){ const lx=bx+Math.cos(heading)*0.5*sd, lz=bz-Math.sin(heading)*0.5*sd; o.position.set(lx,gy+SEAT_H/2,lz); o.scale.set(0.09,SEAT_H,0.28); o.updateMatrix(); legs.push({ m:o.matrix.clone(), c:new THREE.Color(0x5e4330) }); } };
     for(const sp of spirits) add(sp.id,sp.x,sp.z,sp.group.rotation.y);
     for(const q of MEM.slots) if(!q.blocked&&!spirits.some(v=>v.id===q.id)) add(q.id,q.x,q.z,Math.atan2(q.isle.x-q.x,q.isle.z-q.z));
+    report.near=BENCHES.filter(b=>!b.low).map(b=>{ let d=1e9; for(const c of BENCHES) if(c.low) d=Math.min(d,Math.hypot(c.x-b.x,c.z-b.z)); let e=1e9; for(const v of spirits) e=Math.min(e,Math.hypot(v.x-b.x,v.z-b.z)); return `${b.x},${b.z}→凳${d.toFixed(1)}/晶${e.toFixed(1)}`; });
+    window.__benchReport=report; if(report.removedOld.length||report.skippedLow.length) console.info('長椅盤點',report);
     const wm=new THREE.MeshStandardMaterial({ roughness:0.9 }); instanced(new RoundedBoxGeometry(1,1,1,2,0.12),wm,seats,{cast:true,receive:true}); instanced(new THREE.BoxGeometry(1,1,1),wm,legs,{receive:true}); }
   // 石頭步道兩旁的路燈：紀念島的四方小徑＋雲海拱門的踏石步道
   { const spots=[], free=(x,z)=>!BENCHES.some(b=>Math.hypot(b.x-x,b.z-z)<1.0)&&!spirits.some(v=>Math.hypot(v.x-x,v.z-z)<1.2)&&!MEM.slots.some(q=>!q.blocked&&Math.hypot(q.x-x,q.z-z)<1.2)&&!spots.some(p=>Math.hypot(p[0]-x,p[2]-z)<2.5);
@@ -4580,7 +4602,9 @@ function cloudApply(id){
     sp.bornTs=bornTs(rec); setSpiritColor(sp,rec.color|0); setBubble(sp,rec); applyTrib(sp); return sp; }
   if(sp&&!sp.slot){ const x=sp.x, z=sp.z; if(popFor===sp) closePop(); removeCrystal(sp); if(SLOT_IDS.has(id)){ if(MEM.isMem(id)) MEM.released(id); else { makeSlot(id,[x,z]); relayGlow(); } } }
   return null; }
-if(CLOUD){ CLOUD.onChange(cloudApply); $('btnAcct').hidden=false; }
+if(CLOUD){ CLOUD.onChange(cloudApply); $('btnAcct').hidden=false;
+  CLOUD.publicStats().then(v=>{ if(v.total==null) return; const lit=Object.values(CLOUD.recs).filter(r=>r&&r.pos&&!r.hidden).length;
+    $('visits').innerHTML=`已經有<b>${Math.max(1,v.total).toLocaleString()}</b>人來過島嶼微光・今天<b>${Math.max(1,v.today||0).toLocaleString()}</b>人${lit?`・點亮了<b>${lit}</b>顆水晶`:''}`; }); }
 const acctLabel=()=>{ if(CLOUD){ $('btnAcct').textContent=CLOUD.real?'👤 我的帳號':'登入'; $('btnStats').hidden=!CLOUD.admin; } };
 acctLabel();
 let acctMsg='', acctNew='', acctWelcome=false;
@@ -5080,7 +5104,7 @@ const _tagV=new THREE.Vector3();
 function placeLumiTag(){ const t=$('lumiTag'), dressing=$('intro').classList.contains('dressing');
   const vis=(started||dressing)&&!cardOpen&&cam.dist<26;
   if(!vis){ t.classList.remove('show'); return; }
-  _tagV.set(player.x,player.y+(player.sit>0.5?1.25:1.62),player.z).project(camera);
+  _tagV.set(player.x,player.y+(dressing?1.7:player.sit>0.5?1.75:2.25),player.z).project(camera);
   if(_tagV.z>1||Math.abs(_tagV.x)>1.1||Math.abs(_tagV.y)>1.1){ t.classList.remove('show'); return; }
   t.style.left=((_tagV.x*.5+.5)*innerWidth)+'px'; t.style.top=((-_tagV.y*.5+.5)*innerHeight)+'px'; t.classList.add('show'); }
 // 初始鏡頭
