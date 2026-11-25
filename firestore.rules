@@ -109,9 +109,10 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.owner == me();
     }
 
-    // 自己的登錄碼、家人碼清單
+    // 自己的登錄碼、家人碼清單、來訪紀錄（管理員可以讀，用來算統計人數）
     match /users/{u} {
-      allow read, write: if signedIn() && u == me();
+      allow read: if signedIn() && (u == me() || isAdmin());
+      allow write: if signedIn() && u == me();
     }
 
     // 管理員名單：只能在 Firebase 主控台手動新增

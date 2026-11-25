@@ -73,6 +73,12 @@
   #cActs{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; margin:14px 0 4px; } #cActs button{ font:inherit; font-size:12.5px; color:#3a2a14; background:#f2dcc0; border:0; border-radius:16px; padding:10px 4px; cursor:pointer; } #cActs button.main{ grid-column:1/-1; background:#d9909f; color:#fff; font-size:14px; letter-spacing:.15em; }
   #cSame{ text-align:left; margin-top:14px; } #cSame h4{ margin:0 0 8px; font-size:14px; letter-spacing:.12em; color:#f3e2c4; font-weight:500; } #cSame .row{ display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; }
   #cSame .row button{ flex:none; width:112px; font:inherit; color:#f3e2c4; background:rgba(243,217,164,.07); border:1px solid rgba(243,217,164,.18); border-radius:12px; padding:8px; cursor:pointer; text-align:left; } #cSame .ph{ display:flex; align-items:center; justify-content:center; width:100%; aspect-ratio:1; border-radius:10px; background:#20283a center/cover; font-size:26px; margin-bottom:6px; } #cSame b{ display:block; font-size:12.5px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } #cSame small{ font-size:10.5px; color:rgba(243,226,196,.6); }
+  #acct .welcome{ text-align:center; margin:2px 0 14px; } #acct .welcome b{ display:block; font-size:24px; font-weight:500; letter-spacing:.3em; color:#3a2c22; } #acct .welcome small{ display:block; font-family:Georgia,serif; font-size:11px; letter-spacing:.35em; color:#a88a5e; margin-top:4px; }
+  #acct .sgrid{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-bottom:9px; } #acct .sgrid div{ background:#fff; border-radius:12px; padding:10px 4px; text-align:center; } #acct .sgrid b{ display:block; font-size:22px; color:#b0566a; font-weight:600; } #acct .sgrid span{ font-size:11.5px; color:#6a5848; }
+  #acct .sbar{ height:6px; border-radius:4px; background:#f1e6d6; overflow:hidden; margin:2px 0 8px; } #acct .sbar i{ display:block; height:100%; background:linear-gradient(90deg,#e8c27c,#d9909f); }
+  #acct .slist{ display:flex; flex-wrap:wrap; gap:6px; } #acct .slist span{ font-size:12px; background:#f7efe3; border-radius:10px; padding:4px 9px; color:#5a4332; } #acct .slist em{ font-style:normal; color:#a07a52; margin-left:5px; }
+  #acct .srow{ display:flex; justify-content:space-between; gap:8px; font-size:13px; padding:6px 0; border-top:1px solid #f1e6d6; color:#3a2c22; } #acct .srow:first-of-type{ border-top:0; } #acct .srow em{ font-style:normal; font-size:11.5px; color:#a08a74; white-space:nowrap; }
+  @media (max-width:420px){ #acct .sgrid{ grid-template-columns:repeat(2,1fr); } }
   #acctVeil{ position:fixed; inset:0; background:rgba(5,8,15,.6); display:flex; align-items:center; justify-content:center; padding:16px; z-index:13; opacity:0; pointer-events:none; transition:opacity .4s; } #acctVeil.show{ opacity:1; pointer-events:auto; }
   #acct{ width:min(420px,100%); max-height:88vh; overflow:auto; background:#fbf6ee; color:#3a2c22; border-radius:20px; padding:20px 18px; } #acct h3{ margin:0 0 10px; font-size:18px; letter-spacing:.15em; }
   #acct .lead{ font-size:13px; line-height:1.75; color:#6a5848; margin:0 0 10px; } #acct .note{ background:#f7e3e6; color:#9a4256; border-radius:12px; padding:9px 12px; font-size:13px; margin-bottom:10px; line-height:1.6; }
@@ -305,7 +311,7 @@
 <div id="standHint">按 F 或點一下「起身」，繼續走走</div>
 <div id="envbar" class="ui quiet"><div class="grp" title="時間與天氣"><button data-env="day">晝</button><button data-env="dusk">黃昏</button><button data-env="night" class="on">夜</button></div><div class="grp"><button id="btnWide" class="tg" title="全景／回到小光身邊">全景</button><button id="btnTilt" class="tg on" title="移軸景深：開／關">景深</button><button id="btnMusic" class="tg" title="音樂開關">♪ 音樂</button></div></div>
 <div id="hintbar" class="ui"><span><i>✥</i>移動／環顧</span><span><i>◐</i>縮放</span><span><i>☝</i>點擊水晶查看</span><button id="hbMap"><i>⌖</i>地圖導覽</button><button id="hbHome"><i>⌂</i>回到小光</button></div>
-<div id="memBar" class="ui"><button id="btnNewMem" class="main">＋ 點亮紀念</button><button id="btnRoll">紀念名冊</button><button id="btnIsles">前往群島 ▾</button><div id="isleList" hidden></div><button id="btnAcct" hidden>登入</button><button id="btnMore">⋯ 更多</button></div>
+<div id="memBar" class="ui"><button id="btnNewMem" class="main">＋ 點亮紀念</button><button id="btnRoll">紀念名冊</button><button id="btnIsles">前往群島 ▾</button><div id="isleList" hidden></div><button id="btnAcct" hidden>登入</button><button id="btnStats" hidden>📊 園區統計</button><button id="btnMore">⋯ 更多</button></div>
 <div id="acctVeil"><div id="acct"></div></div>
 <div id="pop"><button id="popX">×</button><div class="pt"><span id="popPh"></span><div><b id="popT"></b><em id="popTag"></em></div></div><div class="pb"><button id="popRead" class="main">看看這顆水晶</button><button id="popHeart">💗 問候</button><button id="popFlower">🌸 獻花</button><button id="popSit">🪑 坐上長椅</button></div></div>
 <div id="moreVeil"><div id="more"><h3>使用指南</h3><section><i>💎</i><div><b>點亮紀念</b><p>點一顆空白的小水晶，或按「點亮紀念」，寫下他的名字、稱謂、一句話，再選一張實體照片或虛擬照片。水晶會從小小一顆開始，七天內慢慢長大、越來越亮。</p></div></section><section><i>💌</i><div><b>信・禮物・花・心意</b><p>點一下水晶會出現小卡。可以寫一封信掛在水晶旁、放下一份禮物、獻一束花，或只是問候一聲。禮物、花、問候每顆水晶每天各一次。</p></div></section><section><i>☆</i><div><b>收藏</b><p>在紀念卡按「☆ 收藏」，紀念名冊會把收藏的水晶排在最前面。</p></div></section><section><i>🔒</i><div><b>公開範圍</b><p>紀念設為「只留給自己」時，別人只會看到「不公開的紀念」和一個鎖頭。每封信也可以選「所有人」或「只有我自己」。</p></div></section><section><i>📱</i><div><b>換手機・換瀏覽器</b><p>目前所有紀錄都存在這台裝置上，還沒有雲端同步。要換裝置時，先在這裡「匯出紀錄檔」，到新的裝置再「匯入紀錄檔」。</p></div></section><div class="mb"><button id="moreExport">匯出紀錄檔</button><button id="moreImport">匯入紀錄檔</button></div><button id="moreClose" class="main">回到園中</button></div></div>
@@ -491,7 +497,21 @@ const CLOUD = FB_CFG ? await (async()=>{
       if(!C.uid) return;
       try{ const s=await F.getDoc(F.doc(db,'users',C.uid)); C.profile=s.exists()?s.data():{}; }catch(e){ C.profile={}; }
       for(const m of (C.profile.fam||[])) C.fam.add(m);
-      if(C.real){ try{ C.admin=(await F.getDoc(F.doc(db,'admins',C.uid))).exists(); }catch(e){ C.admin=false; } } };
+      if(C.real){ try{ C.admin=(await F.getDoc(F.doc(db,'admins',C.uid))).exists(); }catch(e){ C.admin=false; } }
+      C.touch(); };
+    // 來訪紀錄：每個身分每天寫一次（統計面板用：累計人數、今天來過、近 7 天、登入方式）
+    C.kind=()=>{ const u=C.user; if(!u) return ''; if(u.isAnonymous) return 'anon'; if(/^kl-.*@code\.kinmen-light\.app$/.test(u.email||'')) return 'code';
+      if((u.providerData||[]).some(p=>p.providerId==='google.com')) return 'google'; return 'email'; };
+    C.touch=async force=>{ if(!C.uid) return; const d=dayNum(), k=C.kind(); if(!force&&C.profile.seenDay===d&&C.profile.kind===k) return;
+      const v={ kind:k, seenDay:d, lastSeen:Date.now() }; if(!C.profile.created) v.created=Date.now();
+      try{ await F.setDoc(F.doc(db,'users',C.uid),v,{ merge:true }); Object.assign(C.profile,v); }catch(e){ console.warn('touch',e); } };
+    // 訪客升級成正式帳號（同一個身分，之前的問候、獻花都保留）
+    C.afterLink=async()=>{ setUser(auth.currentUser); await C.loadMe(); await C.touch(true); await C.refreshPriv(); C.authCb.forEach(f=>f()); };
+    C.stats=async()=>{ const col=F.collection(db,'users'), cnt=async q=>{ try{ return (await F.getCountFromServer(q)).data().count; }catch(e){ console.warn('count',e); return null; } };
+      const W=F.where, Q=(...w)=>F.query(col,...w);
+      const [all,anon,code,google,email,today,week]=await Promise.all([cnt(col),cnt(Q(W('kind','==','anon'))),cnt(Q(W('kind','==','code'))),cnt(Q(W('kind','==','google'))),cnt(Q(W('kind','==','email'))),
+        cnt(Q(W('seenDay','==',dayNum()))),cnt(Q(W('lastSeen','>=',Date.now()-7*864e5)))]);
+      return { all, anon, code, google, email, today, week }; };
     const setUser=u=>{ C.user=u; C.uid=u?u.uid:null; C.real=!!u&&!u.isAnonymous; };
     // 電子郵件登入連結：從信裡點回來時完成登入
     if(U.isSignInWithEmailLink(auth,location.href)){
@@ -502,6 +522,8 @@ const CLOUD = FB_CFG ? await (async()=>{
     }
     try{ const rr=await U.getRedirectResult(auth); if(rr&&rr.user) C.justIn='google'; }catch(e){ console.warn(e); }
     await new Promise(r=>{ const off=U.onAuthStateChanged(auth,u=>{ off(); setUser(u); r(); }); setTimeout(r,6000); });
+    // 沒登入的訪客也給一個匿名身分：可以問候、獻花，也能算進「今天有幾個人來過」
+    if(!C.user){ try{ const cr=await U.signInAnonymously(auth); setUser(cr.user); }catch(e){ console.warn('anon',e); } }
     await C.loadMe();
     // 紀念資料：即時同步（別人點亮、修改、刪除，畫面上會跟著變）
     let chain=Promise.resolve();
@@ -524,14 +546,17 @@ const CLOUD = FB_CFG ? await (async()=>{
     C.codeAcct=code=>{ const c=normCode(code); if(c.length!==12) return null; const g=[c.slice(0,4),c.slice(4,8),c.slice(8,12)];
       return { code:`KL-${g[0]}-${g[1]}-${g[2]}`, email:`kl-${(g[0]+g[1]).toLowerCase()}@code.kinmen-light.app`, pw:`${g[2]}-${g[0]}${g[1]}` }; };
     C.newCode=async()=>{ for(let t=0;t<4;t++){ const a=C.codeAcct(randCode(12));
-        try{ const cr=await U.createUserWithEmailAndPassword(auth,a.email,a.pw); setUser(cr.user); await F.setDoc(F.doc(db,'users',cr.user.uid),{ code:a.code, created:Date.now() },{ merge:true }); C.profile={ ...C.profile, code:a.code }; return a.code; }
+        try{ if(auth.currentUser&&auth.currentUser.isAnonymous){ await U.linkWithCredential(auth.currentUser,U.EmailAuthProvider.credential(a.email,a.pw)); await F.setDoc(F.doc(db,'users',auth.currentUser.uid),{ code:a.code },{ merge:true }); await C.afterLink(); C.profile.code=a.code; return a.code; }
+          const cr=await U.createUserWithEmailAndPassword(auth,a.email,a.pw); setUser(cr.user); await F.setDoc(F.doc(db,'users',cr.user.uid),{ code:a.code, created:Date.now() },{ merge:true }); C.profile={ ...C.profile, code:a.code }; C.touch(true); return a.code; }
         catch(e){ if(e.code!=='auth/email-already-in-use') throw e; } } throw new Error('code'); };
     C.signCode=async code=>{ const a=C.codeAcct(code); if(!a) throw { code:'kl/format' }; await U.signInWithEmailAndPassword(auth,a.email,a.pw); };
     C.signGoogle=async()=>{ const pv=new U.GoogleAuthProvider(); pv.setCustomParameters({ prompt:'select_account' });
+      if(auth.currentUser&&auth.currentUser.isAnonymous){ try{ await U.linkWithPopup(auth.currentUser,pv); await C.afterLink(); return; }
+        catch(e){ if(e.code==='auth/credential-already-in-use'){ const cred=U.GoogleAuthProvider.credentialFromError(e); if(cred){ await U.signInWithCredential(auth,cred); return; } } else if(e.code!=='auth/popup-blocked') throw e; } }
       try{ await U.signInWithPopup(auth,pv); }catch(e){ if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment') await U.signInWithRedirect(auth,pv); else throw e; } };
-    C.linkGoogle=async()=>{ const pv=new U.GoogleAuthProvider(); await U.linkWithPopup(auth.currentUser,pv); };
+    C.linkGoogle=async()=>{ const pv=new U.GoogleAuthProvider(); await U.linkWithPopup(auth.currentUser,pv); await C.afterLink(); };
     C.sendLink=async email=>{ await U.sendSignInLinkToEmail(auth,email,{ url:location.origin+location.pathname, handleCodeInApp:true }); try{ localStorage.setItem('kmlight-email',email); }catch(e){} };
-    C.signOut=()=>U.signOut(auth);
+    C.signOut=async()=>{ await U.signOut(auth); try{ await U.signInAnonymously(auth); }catch(e){} };
     C.ensureUser=async()=>{ if(!C.user){ const cr=await U.signInAnonymously(auth); setUser(cr.user); } };
     // ── 照片：預設壓縮後直接存在紀念資料裡（免費方案可用）；開啟 useStorage 才放 Cloud Storage ──
     C.putPhoto=async(id,dataUrl)=>{ if(!FB_CFG.useStorage) return dataUrl;
@@ -4548,15 +4573,16 @@ function cloudApply(id){
   if(sp&&!sp.slot){ const x=sp.x, z=sp.z; if(popFor===sp) closePop(); removeCrystal(sp); if(SLOT_IDS.has(id)){ if(MEM.isMem(id)) MEM.released(id); else { makeSlot(id,[x,z]); relayGlow(); } } }
   return null; }
 if(CLOUD){ CLOUD.onChange(cloudApply); $('btnAcct').hidden=false; }
-const acctLabel=()=>{ if(CLOUD) $('btnAcct').textContent=CLOUD.real?'👤 我的帳號':'登入'; };
+const acctLabel=()=>{ if(CLOUD){ $('btnAcct').textContent=CLOUD.real?'👤 我的帳號':'登入'; $('btnStats').hidden=!CLOUD.admin; } };
 acctLabel();
-let acctMsg='', acctNew='';
+let acctMsg='', acctNew='', acctWelcome=false;
 function openAcct(msg){ if(!CLOUD) return; acctMsg=msg||''; closePop(); cardOpen=true; for(const k in keys) keys[k]=false; input.f=input.r=0; renderAcct(); $('acctVeil').classList.add('show'); }
-function closeAcct(){ $('acctVeil').classList.remove('show'); cardOpen=false; acctNew=''; if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); }
+function closeAcct(){ $('acctVeil').classList.remove('show'); cardOpen=false; acctNew=''; acctWelcome=false; if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); }
 function renderAcct(){
   const C=CLOUD, u=C.user, isCode=!!u&&/^kl-.*@code\.kinmen-light\.app$/.test(u.email||''), hasG=!!u&&(u.providerData||[]).some(p=>p.providerId==='google.com');
   const nLocal=Object.keys(CLAIMS).filter(id=>CLAIMS[id]&&CLAIMS[id].name&&CLAIMS[id].pos).length;
-  let h=`<h3>${C.real?'我的帳號':'登入島嶼微光'}</h3>`+(acctMsg?`<div class="note">${esc(acctMsg)}</div>`:'');
+  let h=acctWelcome&&!C.real?`<div class="welcome"><b>島嶼微光</b><small>ISLAND OF LIGHT</small></div><h3>登入，把思念留在島上</h3>`:`<h3>${C.real?'我的帳號':'登入島嶼微光'}</h3>`;
+  h+=(acctMsg?`<div class="note">${esc(acctMsg)}</div>`:'');
   if(acctNew) h+=`<div class="box hl"><b>✨ 這是你的登錄碼</b><div class="code">${esc(acctNew)}</div><p>請現在就抄下來或截圖保存。換手機、換瀏覽器時，用這組碼就能登入。也可以在下面綁定 Google，多一條找回的路。</p><div class="row"><button data-a="copy" data-c="${esc(acctNew)}">複製登錄碼</button></div></div>`;
   if(!C.real){
     h+=`<p class="lead">不登入也可以逛園區、問候和獻花。要點亮紀念、寫信，並且換手機也找得回來，請先登入。</p>
@@ -4571,9 +4597,10 @@ function renderAcct(){
     else if(isCode&&!hasG) h+=`<div class="row"><button data-a="link">綁定 Google（多一條找回的路）</button></div><div class="gap8"></div>`;
     h+=`<div class="box"><b>👪 輸入家人碼</b><p>家人給你的家人碼（FM- 開頭）。輸入後就能看見不公開的紀念，也能寫「給家人看」的信。</p><input id="acFam" placeholder="FM-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false"><div class="row"><button data-a="fam">加入</button></div></div>`;
     if(nLocal) h+=`<div class="box"><b>☁ 搬上雲端</b><p>這台裝置還有 ${nLocal} 筆只存在這裡的紀念（連同你寫的信）。搬上雲端後，換手機也看得到，家人也能來看。</p><div class="row"><button class="main" data-a="move">搬上雲端</button></div></div>`;
+    if(C.admin) h+=`<div class="row"><button class="main" data-a="stats">📊 園區統計</button></div>`;
     h+=`<div class="row"><button data-a="out">登出</button></div>`;
   }
-  h+=`<div class="msg" id="acMsg"></div><button id="acClose">回到園中</button>`;
+  h+=`<div class="msg" id="acMsg"></div><button id="acClose">${acctWelcome&&!C.real?'先逛逛，之後再登入':'回到園中'}</button>`;
   const el=$('acct'); el.innerHTML=h;
   $('acClose').addEventListener('click',e=>{ e.stopPropagation(); closeAcct(); });
   el.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter'){ const b=i.parentElement.querySelector('button[data-a]'); if(b) b.click(); } }));
@@ -4589,6 +4616,7 @@ function renderAcct(){
       else if(a==='fam'){ msg('加入中…'); const mid=await C.joinFam($('acFam').value); closeAcct(); toast('已經加入家人，可以看見這份紀念了'); const sp=spirits.find(v=>v.id===mid); if(sp) setTimeout(()=>goToCrystal(sp),300); }
       else if(a==='move'){ msg('搬移中，請不要關掉頁面…'); const n=await migrateLocal(); acctMsg=n?`已經把 ${n} 筆紀念搬上雲端了`:'沒有搬成功，請稍後再試'; renderAcct(); }
       else if(a==='out'){ await C.signOut(); closeAcct(); toast('已經登出了'); }
+      else if(a==='stats'){ openStats(); }
     }catch(err){ console.warn(err); msg(cloudErr(err)); }
     finally{ b.disabled=false; } }));
 }
@@ -4597,9 +4625,35 @@ if(CLOUD){
   $('acctVeil').addEventListener('click',e=>{ if(e.target===$('acctVeil')) closeAcct(); });
   ['pointerdown','touchstart'].forEach(ev=>$('acctVeil').addEventListener(ev,e=>e.stopPropagation(),{passive:true}));
   CLOUD.authCb.push(()=>{ acctLabel(); if($('acctVeil').classList.contains('show')) renderAcct(); });
+  $('btnStats').addEventListener('click',e=>{ e.stopPropagation(); if(cardOpen) return; openStats(); });
+  $('enter').addEventListener('click',()=>{ if(!CLOUD.real) setTimeout(()=>{ acctWelcome=true; openAcct(); },700); });
   $('enter').addEventListener('click',()=>setTimeout(()=>{ if(CLOUD.justIn) toast('登入成功，歡迎回來'); else if(CLOUD.linkErr) toast('這個登入連結已經用過或過期了，請重新寄一次'); },1800));
 }
 if(window.__cloudFail) $('enter').addEventListener('click',()=>setTimeout(()=>toast('雲端暫時連不上，這次會先保存在這台裝置'),1800));
+
+// 園區統計（只有管理員看得到）：來訪人數來自 users 的計數；水晶與心意直接用已經載入的紀念資料算
+async function openStats(){ if(!CLOUD||!CLOUD.admin) return; cardOpen=true; closePop();
+  const el=$('acct'); el.innerHTML='<h3>📊 園區統計</h3><p class="lead">讀取中…</p>'; $('acctVeil').classList.add('show');
+  const st=await CLOUD.stats(), n=v=>v==null?'—':v.toLocaleString();
+  const recs=Object.entries(CLOUD.recs).filter(([id,r])=>r&&r.pos), total=SLOT_IDS.size+recs.filter(([id])=>!SLOT_IDS.has(id)).length;
+  const pub=recs.filter(([,r])=>r.visibility!=='private').length, pri=recs.length-pub, hid=recs.filter(([,r])=>r.hidden).length;
+  const isleOf=id=>{ const sl=MEM.slots.find(v=>v.id===id); return sl?sl.isle.name:'雲海拱門'; }, by={};
+  for(const [id] of recs) by[isleOf(id)]=(by[isleOf(id)]||0)+1;
+  const isles=['雲海拱門',...MEM.isles.map(I=>I.name)], cap={}; for(const id of SLOT_IDS) cap[isleOf(id)]=(cap[isleOf(id)]||0)+1;
+  let fl=0, gi=0, he=0, lc=0; for(const [,r] of recs){ const t=r.t||{}; fl+=t.fc||0; gi+=t.gc||0; he+=t.h||0; lc+=t.lc||0; }
+  const recent=recs.slice().sort((a,b)=>(b[1].gen||b[1].ts||0)-(a[1].gen||a[1].ts||0)).slice(0,6);
+  const pct=total?Math.round(recs.length/total*100):0, now=new Date();
+  el.innerHTML=`<h3>📊 園區統計</h3><p class="lead">更新於 ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}・人數以「每個身分」計算，同一人換裝置未登入會各算一次</p>
+    <div class="sgrid"><div><b>${n(st.today)}</b><span>今天來過</span></div><div><b>${n(st.week)}</b><span>近 7 天</span></div><div><b>${n(st.all)}</b><span>累計來過</span></div><div><b>${n([st.code,st.google,st.email].some(v=>v==null)?null:st.code+st.google+st.email)}</b><span>已登入帳號</span></div></div>
+    <div class="box"><b>👤 登入方式</b><p>🔑 登錄碼 ${n(st.code)}　Ｇ Google ${n(st.google)}　✉ 電子郵件 ${n(st.email)}<br>🌱 只逛逛、沒登入的訪客 ${n(st.anon)}</p></div>
+    <div class="box"><b>💎 紀念水晶</b><p>已點亮 <b>${recs.length}</b> ／ ${total} 個位置（${pct}%）<br>公開 ${pub}・不公開 ${pri}${hid?`・已隱藏 ${hid}`:''}</p><div class="sbar"><i style="width:${Math.max(2,pct)}%"></i></div>
+      <div class="slist">${isles.map(k=>`<span>${esc(k)}<em>${by[k]||0} / ${cap[k]||0}</em></span>`).join('')}</div></div>
+    <div class="box"><b>💗 大家留下的心意</b><p>🌸 獻花 ${fl}　🎁 禮物 ${gi}　💗 問候 ${he}　💌 寫給他們的信 ${lc}</p></div>
+    <div class="box"><b>🕯 最近點亮</b>${recent.length?recent.map(([id,r])=>{ const v=MemorialStore.get(id)||r, nm=r.visibility==='private'&&!MemorialStore.canSee(id)?'不公開的紀念':(titleOf(v)||'紀念');
+      return `<div class="srow"><span>${esc(nm)}</span><em>${esc(isleOf(id))}・${r.created||''}</em></div>`; }).join(''):'<p>還沒有人點亮水晶</p>'}</div>
+    <div class="row"><button data-a="re">重新整理</button></div><button id="acClose">回到園中</button>`;
+  $('acClose').addEventListener('click',e=>{ e.stopPropagation(); closeAcct(); });
+  el.querySelector('[data-a="re"]').addEventListener('click',e=>{ e.stopPropagation(); openStats(); }); }
 // 家人碼：只有點亮的人看得到，可以換新（舊的碼就失效，已經加入的家人不受影響）
 async function showFamCode(s){ const b=[...$('cBtns').querySelectorAll('button')].find(v=>v.textContent==='家人碼'); if(b) b.textContent='產生中…';
   try{ const code=await CLOUD.famCode(s.id,false); closeCard(); openAcctFam(s,code); }catch(e){ toast(cloudErr(e)); if(b) b.textContent='家人碼'; } }
