@@ -1,0 +1,13 @@
+rules_version = '2';
+// 只有在 firebase-config.js 設定 useStorage: true 時才會用到（需要 Blaze 方案）
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /photos/{uid}/{file} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.size < 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
