@@ -46,6 +46,12 @@
   #dress .sw.on{ border-color:#fff1d2; transform:scale(1.14); box-shadow:0 0 14px rgba(255,225,160,.55), inset 0 -4px 8px rgba(0,0,0,.18); }
   #dress .tx{ font:inherit; font-size:12px; letter-spacing:.2em; padding:7px 14px; border-radius:16px; cursor:pointer; color:#fff1d2; background:rgba(243,217,164,.06); border:1px solid rgba(243,217,164,.35); }
   #dress .tx.on{ background:rgba(243,217,164,.2); border-color:#fff1d2; box-shadow:0 0 14px rgba(240,190,110,.3); }
+  #dress input{ font:inherit; font-size:14px; letter-spacing:.15em; text-align:center; width:min(220px,56vw); padding:7px 12px; border-radius:16px; color:#fff1d2; background:rgba(243,217,164,.06); border:1px solid rgba(243,217,164,.35); outline:none; }
+  #dress input:focus{ border-color:#fff1d2; box-shadow:0 0 14px rgba(240,190,110,.3); } #dress input::placeholder{ color:rgba(243,217,164,.45); }
+  #lumiTag{ position:fixed; left:0; top:0; transform:translate(-50%,-100%); pointer-events:none; z-index:4; font-size:12.5px; letter-spacing:.18em; color:#fff1d2; background:rgba(12,16,28,.5); border:1px solid rgba(243,217,164,.35); border-radius:12px; padding:3px 10px 3px 12px; white-space:nowrap; text-shadow:0 0 8px rgba(240,190,110,.5); opacity:0; transition:opacity .4s; }
+  #lumiTag.show{ opacity:1; }
+  #more .lname{ display:flex; align-items:center; gap:8px; background:#fff; border-radius:14px; padding:10px 12px; margin-bottom:9px; } #more .lname b{ font-size:14px; white-space:nowrap; }
+  #more .lname input{ flex:1; min-width:0; font:inherit; font-size:14px; padding:7px 10px; border:1px solid #d9c3a0; border-radius:10px; background:#fffdf9; color:#3a2c22; } #more .lname button{ font:inherit; font-size:13px; border:1px solid #d9c3a0; background:#f3e9da; color:#5a4332; border-radius:10px; padding:7px 12px; cursor:pointer; }
   #dress .nm{ font-size:11px; letter-spacing:.2em; color:rgba(243,217,164,.75); min-height:1.3em; }
   #dressOk{ font:inherit; font-size:13.5px; letter-spacing:.4em; color:#fff1d2; background:rgba(243,217,164,.1); border:1px solid rgba(243,217,164,.55); border-radius:24px; padding:10px 22px 10px 28px; cursor:pointer; margin-top:2px; }
   /* 多人水晶紀念：左上角的「點亮紀念」「紀念名冊」與名冊面板 */
@@ -306,15 +312,16 @@
 <div id="keys" class="ui quiet">
   <div><b>W A S D</b>移動</div><div><b>Shift</b>跑步</div><div><b>拖曳滑鼠</b>環顧</div><div><b>滾輪</b>拉遠 / 拉近</div><div><b>V</b>全景看園區的光</div><div><b>E</b>點亮等待的光／閱讀光的故事</div><div><b>F</b>坐下 / 起身</div><div><b>G</b>佈置：點燈・相框・花束・酒</div>
 </div>
+<div id="lumiTag"></div>
 <div id="nameTag" class="ui quiet"><span id="ntName"></span><i id="ntSub"></i></div>
 <div id="prompt" class="ui quiet"></div>
 <div id="standHint">按 F 或點一下「起身」，繼續走走</div>
-<div id="envbar" class="ui quiet"><div class="grp" title="時間與天氣"><button data-env="day">晝</button><button data-env="dusk">黃昏</button><button data-env="night" class="on">夜</button></div><div class="grp"><button id="btnWide" class="tg" title="全景／回到小光身邊">全景</button><button id="btnTilt" class="tg on" title="移軸景深：開／關">景深</button><button id="btnMusic" class="tg" title="音樂開關">♪ 音樂</button></div></div>
+<div id="envbar" class="ui quiet"><div class="grp" title="時間與天氣"><button data-env="day">晝</button><button data-env="dusk">黃昏</button><button data-env="night" class="on">夜</button></div><div class="grp"><button id="btnWide" class="tg" title="全景／回到小光身邊">全景</button><button id="btnTilt" class="tg on" title="移軸景深：開／關">景深</button><button id="btnMusic" class="tg" title="音樂開關">♪ 音樂</button><button id="btnSmooth" class="tg" title="流暢模式：降低一些畫質，讓畫面更順">流暢</button></div></div>
 <div id="hintbar" class="ui"><span><i>✥</i>移動／環顧</span><span><i>◐</i>縮放</span><span><i>☝</i>點擊水晶查看</span><button id="hbMap"><i>⌖</i>地圖導覽</button><button id="hbHome"><i>⌂</i>回到小光</button></div>
 <div id="memBar" class="ui"><button id="btnNewMem" class="main">＋ 點亮紀念</button><button id="btnRoll">紀念名冊</button><button id="btnIsles">前往群島 ▾</button><div id="isleList" hidden></div><button id="btnAcct" hidden>登入</button><button id="btnStats" hidden>📊 園區統計</button><button id="btnMore">⋯ 更多</button></div>
 <div id="acctVeil"><div id="acct"></div></div>
 <div id="pop"><button id="popX">×</button><div class="pt"><span id="popPh"></span><div><b id="popT"></b><em id="popTag"></em></div></div><div class="pb"><button id="popRead" class="main">看看這顆水晶</button><button id="popHeart">💗 問候</button><button id="popFlower">🌸 獻花</button><button id="popSit">🪑 坐上長椅</button></div></div>
-<div id="moreVeil"><div id="more"><h3>使用指南</h3><section><i>💎</i><div><b>點亮紀念</b><p>點一顆空白的小水晶，或按「點亮紀念」，寫下他的名字、稱謂、一句話，再選一張實體照片或虛擬照片。水晶會從小小一顆開始，七天內慢慢長大、越來越亮。</p></div></section><section><i>💌</i><div><b>信・禮物・花・心意</b><p>點一下水晶會出現小卡。可以寫一封信掛在水晶旁、放下一份禮物、獻一束花，或只是問候一聲。禮物、花、問候每顆水晶每天各一次。</p></div></section><section><i>☆</i><div><b>收藏</b><p>在紀念卡按「☆ 收藏」，紀念名冊會把收藏的水晶排在最前面。</p></div></section><section><i>🔒</i><div><b>公開範圍</b><p>紀念設為「只留給自己」時，別人只會看到「不公開的紀念」和一個鎖頭。每封信也可以選「所有人」或「只有我自己」。</p></div></section><section><i>📱</i><div><b>換手機・換瀏覽器</b><p>目前所有紀錄都存在這台裝置上，還沒有雲端同步。要換裝置時，先在這裡「匯出紀錄檔」，到新的裝置再「匯入紀錄檔」。</p></div></section><div class="mb"><button id="moreExport">匯出紀錄檔</button><button id="moreImport">匯入紀錄檔</button></div><button id="moreClose" class="main">回到園中</button></div></div>
+<div id="moreVeil"><div id="more"><h3>使用指南</h3><div class="lname"><b>✨ 小光的名字</b><input id="moreName" maxlength="10" placeholder="小光" autocomplete="off" spellcheck="false"><button id="moreNameOk">改名</button></div><section><i>💎</i><div><b>點亮紀念</b><p>點一顆空白的小水晶，或按「點亮紀念」，寫下他的名字、稱謂、一句話，再選一張實體照片或虛擬照片。水晶會從小小一顆開始，七天內慢慢長大、越來越亮。</p></div></section><section><i>💌</i><div><b>信・禮物・花・心意</b><p>點一下水晶會出現小卡。可以寫一封信掛在水晶旁、放下一份禮物、獻一束花，或只是問候一聲。禮物、花、問候每顆水晶每天各一次。</p></div></section><section><i>☆</i><div><b>收藏</b><p>在紀念卡按「☆ 收藏」，紀念名冊會把收藏的水晶排在最前面。</p></div></section><section><i>🔒</i><div><b>公開範圍</b><p>紀念設為「只留給自己」時，別人只會看到「不公開的紀念」和一個鎖頭。每封信也可以選「所有人」或「只有我自己」。</p></div></section><section><i>📱</i><div><b>換手機・換瀏覽器</b><p>目前所有紀錄都存在這台裝置上，還沒有雲端同步。要換裝置時，先在這裡「匯出紀錄檔」，到新的裝置再「匯入紀錄檔」。</p></div></section><div class="mb"><button id="moreExport">匯出紀錄檔</button><button id="moreImport">匯入紀錄檔</button></div><button id="moreClose" class="main">回到園中</button></div></div>
 <input type="file" id="moreFile" accept="application/json,.json" style="display:none">
 <div id="stick"><i></i></div>
 <div id="actions"><button id="btnOffer" class="act ui quiet">佈置</button><button id="btnRead" class="act ui quiet">閱讀</button><button id="btnSit" class="act">坐下</button></div>
@@ -350,6 +357,7 @@
     <div class="row"><span>披風</span><div class="opts" data-k="cloak"></div></div>
     <div class="row"><span>兜帽</span><div class="opts" data-k="skin"></div></div>
     <div class="row"><span>頭飾</span><div class="opts" data-k="hat"></div></div>
+    <div class="row"><span>名字</span><input id="lumiName" maxlength="10" placeholder="小光" autocomplete="off" spellcheck="false"></div>
     <div class="nm" id="dressName"></div>
     <button id="dressOk">選好了，選擇島嶼</button></div>
   <div id="pick"><button data-isl="arch"><b>雲海拱門</b><small>白樹、雲橋與石拱門<br>紀念水晶與光束</small></button><button data-isl="forest"><b>微光森林</b><small>森林、海灘與燈塔<br>為思念的人種一棵樹</small></button></div>
@@ -3959,7 +3967,7 @@ async function cloudGive(s,kind,k,after){
   catch(e){ console.warn(e); toast(cloudErr(e)); } }
 let letterFor=null, letterEdit=null;
 const LETTER_STEPS=[
-  { keys:['from'], q:()=>`寫一封信給${esc(titleOf(MemorialStore.get(letterFor.id)))}<small>你是他的…？</small>`, body:()=>chips(FROMS.map(v=>[v,v]),'from',true)+'<div class="gap8"></div>'+field('from','input','或自己寫：例如 隔壁的小明'), ok:()=>!!(askData.from||'').trim() },
+  { keys:['from'], q:()=>`寫一封信給${esc(titleOf(MemorialStore.get(letterFor.id)))}<small>你是他的…？</small>`, body:()=>chips([...(lumiName?[lumiName]:[]),...FROMS].map(v=>[v,v]),'from',true)+'<div class="gap8"></div>'+field('from','input','或自己寫：例如 隔壁的小明'), ok:()=>!!(askData.from||'').trim() },
   { keys:['prompt'], q:()=>'想從哪一句開始寫？', body:()=>chips(PROMPTS.map(v=>[v,v]),'prompt'), ok:()=>!!askData.prompt },
   { keys:['text'], q:()=>`${esc(askData.prompt)}<small>慢慢寫，寫多少都可以</small>`, body:()=>field('text','textarea','寫下想對他說的話'), ok:()=>!!(askData.text||'').trim() },
   { keys:['vis'], q:()=>'這封信要讓誰看見？', body:()=>chips(CLOUD?[['all','所有來園區的人'],['family','家人（輸入家人碼的人）'],['me','只有我自己']]:[['all','所有來園區的人'],['me','只有我自己']],'vis'), ok:()=>!!askData.vis },
@@ -4850,8 +4858,9 @@ const TILT={ uniforms:{ tDiffuse:{value:null}, delta:{value:new THREE.Vector2(1,
 const tiltH=new ShaderPass(TILT), tiltV=new ShaderPass(TILT);
 composer.addPass(tiltH); composer.addPass(tiltV);
 // 移軸景深開關（記住使用者的選擇）
+let smoothOn=false, smoothSet=false; try{ const v=localStorage.getItem('kl_smooth'); smoothOn=v==='1'; smoothSet=v!==null; }catch(e){}
 let tiltOn=true; try{ tiltOn=localStorage.getItem('kl_tilt')!=='0'; }catch(e){}
-function setTilt(on){ tiltOn=on; tiltH.enabled=tiltV.enabled=on; const b=$('btnTilt'); if(b) b.classList.toggle('on',on); try{ localStorage.setItem('kl_tilt',on?'1':'0'); }catch(e){} }
+function setTilt(on){ tiltOn=on; tiltH.enabled=tiltV.enabled=on&&!smoothOn; const b=$('btnTilt'); if(b) b.classList.toggle('on',on); try{ localStorage.setItem('kl_tilt',on?'1':'0'); }catch(e){} }
 setTilt(tiltOn);
 $('btnTilt').addEventListener('click',()=>setTilt(!tiltOn));
 function setTiltSize(w,h){ tiltH.uniforms.delta.value.set(3/w,0); tiltV.uniforms.delta.value.set(0,3/h); }
@@ -4868,9 +4877,16 @@ const gradePass=new ShaderPass({ uniforms:{ tDiffuse:{value:null}, saturation:{v
       c+=(fract(sin(dot(gl_FragCoord.xy+uTime,vec2(12.9898,78.233)))*43758.5453)-0.5)/255.0;
       gl_FragColor=vec4(c,1.0); }` });
 composer.addPass(gradePass);
-const fxaa=new ShaderPass(FXAAShader);   // 電腦與手機都用 FXAA（多重取樣緩衝在部分電腦上會整片變黑） composer.addPass(fxaa);
+const fxaa=new ShaderPass(FXAAShader); composer.addPass(fxaa);   // 電腦與手機都用 FXAA（多重取樣緩衝在部分電腦上會整片變黑）
 function setFxaaSize(w,h){ fxaa.material.uniforms.resolution.value.set(1/w,1/h); }
 setFxaaSize(innerWidth*pixelRatio,innerHeight*pixelRatio);
+// 流暢模式：解析度降到 1 倍、關掉移軸景深與抗鋸齒、月光不投影子、光暈用較低解析度。換取更順的畫面（手機、舊電腦適用）
+const PR_FULL=pixelRatio, BLOOM_FULL=Q.bloomScale;
+function setSmooth(on,save=true){ smoothOn=on; pixelRatio=on?Math.min(1,PR_FULL):PR_FULL; Q.bloomScale=on?Math.min(0.35,BLOOM_FULL):BLOOM_FULL;
+  fxaa.enabled=!on; moonLight.castShadow=Q.shadows&&!on; tiltH.enabled=tiltV.enabled=tiltOn&&!on&&!$('intro').classList.contains('dressing');
+  const b=$('btnSmooth'); if(b) b.classList.toggle('on',on); if(typeof resize==='function') resize();
+  if(save){ smoothSet=true; try{ localStorage.setItem('kl_smooth',on?'1':'0'); }catch(e){} } }
+$('btnSmooth').addEventListener('click',()=>{ setSmooth(!smoothOn); toast(smoothOn?'已開啟流暢模式：畫質稍微降低，畫面會更順':'已關閉流暢模式，回到完整畫質'); });
 
 
 // 螢火蟲（參考《燕尾脊宗祠》）：黃昏與夜晚在草地上方飄、一明一滅
@@ -5019,7 +5035,7 @@ function resize(){
   camera.aspect=w/h; camera.fov=w<h?66:55; camera.updateProjectionMatrix();
   uPointScale.value=h*pixelRatio/(2*Math.tan(camera.fov*Math.PI/360));
 }
-addEventListener('resize',resize); resize();
+addEventListener('resize',resize); resize(); if(smoothOn) setSmooth(true,false);
 
 const clock=new THREE.Clock(); let slowT=0, fastT=0;
 let frameNo=0;
@@ -5032,15 +5048,41 @@ function frame(){ frameNo++; MEM.tick(gTime.value);
   skyGroup.position.copy(camera.position);
   moonLight.target.position.set(Math.round(player.x/4)*4,0,Math.round(player.z/4)*4);
   moonLight.position.copy(moonLight.target.position).addScaledVector(MOON_DIR,110);
-  composer.render();
+  composer.render(); placeLumiTag();
   // 自動降階：持續掉幀就降低解析度
   if(started){ if(raw>1/26) slowT+=raw; else slowT=Math.max(0,slowT-raw*.5);
     // 先關較吃效能的效果，最後才降解析度，而且不低於 1 倍（以免整體畫面變粗、出現顆粒感）
     if(slowT>3){ slowT=0;
-      if(tiltH.enabled){ tiltH.enabled=tiltV.enabled=false; tiltOn=false; const b=$('btnTilt'); if(b) b.classList.remove('on'); }
+      if(!smoothOn&&!smoothSet){ setSmooth(true,false); toast('畫面有點卡，已經切換到流暢模式（右上角「流暢」可以關掉）'); }
+      else if(tiltH.enabled){ tiltH.enabled=tiltV.enabled=false; tiltOn=false; const b=$('btnTilt'); if(b) b.classList.remove('on'); }
       else if(Q.bloomScale>0.35){ Q.bloomScale=0.35; resize(); }
       else if(pixelRatio>1){ pixelRatio=Math.max(1,pixelRatio-0.25); resize(); } } }
 }
+
+// ── 小光的名字：打扮時取名，頭上有名牌；登入的人存在雲端（換手機也跟著），沒登入就存在這台裝置 ──
+const LUMI_KEY='kmlight-lumi-name';
+let lumiName=''; try{ lumiName=localStorage.getItem(LUMI_KEY)||''; }catch(e){}
+const cleanName=v=>(v||'').replace(/[<>\n\r\t]/g,'').trim().slice(0,10);
+const lumiShown=()=>lumiName||'小光';
+function setLumiName(v,save=true){ lumiName=cleanName(v); try{ localStorage.setItem(LUMI_KEY,lumiName); }catch(e){}
+  $('lumiTag').textContent=lumiShown(); $('lumiName').value=lumiName; $('moreName').value=lumiName;
+  if(save&&CLOUD&&CLOUD.uid){ CLOUD.F.setDoc(CLOUD.F.doc(CLOUD.db,'users',CLOUD.uid),{ lumi:lumiName },{ merge:true }).catch(e=>console.warn('lumi',e)); CLOUD.profile.lumi=lumiName; } }
+function syncLumiFromCloud(){ if(CLOUD&&CLOUD.profile&&typeof CLOUD.profile.lumi==='string'&&CLOUD.profile.lumi!==lumiName) setLumiName(CLOUD.profile.lumi,false);
+  else if(CLOUD&&CLOUD.uid&&lumiName&&CLOUD.profile&&CLOUD.profile.lumi==null) setLumiName(lumiName,true); }
+setLumiName(lumiName,false); syncLumiFromCloud();
+if(CLOUD) CLOUD.authCb.push(syncLumiFromCloud);
+$('lumiName').addEventListener('input',e=>{ $('lumiTag').textContent=cleanName(e.target.value)||'小光'; });
+$('lumiName').addEventListener('change',e=>setLumiName(e.target.value));
+$('lumiName').addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter') e.target.blur(); });
+$('moreName').addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter') $('moreNameOk').click(); });
+$('moreNameOk').addEventListener('click',e=>{ e.stopPropagation(); setLumiName($('moreName').value); toast(`好的，以後就叫「${lumiShown()}」`); });
+const _tagV=new THREE.Vector3();
+function placeLumiTag(){ const t=$('lumiTag'), dressing=$('intro').classList.contains('dressing');
+  const vis=(started||dressing)&&!cardOpen&&cam.dist<26;
+  if(!vis){ t.classList.remove('show'); return; }
+  _tagV.set(player.x,player.y+(player.sit>0.5?1.25:1.62),player.z).project(camera);
+  if(_tagV.z>1||Math.abs(_tagV.x)>1.1||Math.abs(_tagV.y)>1.1){ t.classList.remove('show'); return; }
+  t.style.left=((_tagV.x*.5+.5)*innerWidth)+'px'; t.style.top=((-_tagV.y*.5+.5)*innerHeight)+'px'; t.classList.add('show'); }
 // 初始鏡頭
 player.y=groundY(player.x,player.z); updateInteraction(); updateCamera(1);
 LP(0.94,'準備畫面…',0.99); await nextPaint();
@@ -5051,7 +5093,9 @@ $('status').textContent=''; const enter=$('enter'); enter.classList.add('ready')
 // 走進園區 → 選擇從哪座島進入
 const SPAWN={ arch:null, forest:{ x:-6+OX, z:17+OZ } };
 function enterAt(k){ if(started) return; const sp=SPAWN[k];
-  if(sp){ player.x=sp.x; player.z=sp.z; player.y=groundY(player.x,player.z); for(let i=0;i<6;i++) updateCamera(1); }
+  if(sp){ player.x=sp.x; player.z=sp.z; player.y=groundY(player.x,player.z); }
+  // 一進園區先看到小光的正面（鏡頭在小光前方）；開始走動後鏡頭會自然繞回身後
+  cam.yaw=player.heading; cam.sy=0; cam.sp=0; cam.pitchAuto=null; cam.pitch=0.5; cam.distT=cam.dist=NEAR_DIST; for(let i=0;i<6;i++) updateCamera(1);
   started=true; document.body.classList.add('started'); $('intro').classList.add('gone'); Music.start(); }
 // 走進園區 → 先打扮小光（鏡頭轉到正面）→ 再選島
 let camSave=null;
@@ -5067,9 +5111,9 @@ function syncDress(k){ for(const kk of ['cloak','skin','hat']) document.querySel
 buildDress();
 enter.addEventListener('click',()=>{ if(started) return; $('intro').classList.add('dressing');
   camSave={ yaw:cam.yaw, pitch:cam.pitch, dist:cam.dist, distT:cam.distT };
-  cam.yaw=player.heading+0.35; cam.pitch=0.22; cam.dist=cam.distT=LOW?5.4:4.8;
+  cam.yaw=player.heading; cam.pitch=0.22; cam.dist=cam.distT=LOW?5.4:4.8;
   camera.setViewOffset(innerWidth,innerHeight,0,innerHeight*0.2,innerWidth,innerHeight); camera.updateProjectionMatrix(); tiltH.enabled=tiltV.enabled=false; });
-$('dressOk').addEventListener('click',()=>{ if(camSave){ Object.assign(cam,camSave); camSave=null; } camera.clearViewOffset(); camera.updateProjectionMatrix(); tiltH.enabled=tiltV.enabled=tiltOn;
+$('dressOk').addEventListener('click',()=>{ setLumiName($('lumiName').value); if(camSave){ Object.assign(cam,camSave); camSave=null; } camera.clearViewOffset(); camera.updateProjectionMatrix(); tiltH.enabled=tiltV.enabled=tiltOn&&!smoothOn;
   const it=$('intro'); it.classList.remove('dressing'); it.classList.add('picking'); });
 document.querySelectorAll('#pick [data-isl]').forEach(b=>b.addEventListener('click',()=>enterAt(b.dataset.isl)));
 // 左上角顯示目前在哪座島
