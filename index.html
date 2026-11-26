@@ -4643,15 +4643,30 @@ const SHOPS=[]; let SHOP_FX=null;
     kinds.forEach(([col,r],i)=>{ const x=-0.84+i*0.42, z=0.35; box(g,0.38,0.14,0.36,crate,x,0.99,z); const m=std(col,0.55);
       for(let a=0;a<3;a++) for(let b=0;b<3;b++) ball(g,r,m,x-0.1+a*0.1,1.1+((a+b)%2)*0.03,z-0.1+b*0.1); });
     for(const [x,z] of [[-1.55,0.85],[1.55,0.85]]){ box(g,0.55,0.4,0.45,crate,x,0.2,z); for(let k=0;k<6;k++) ball(g,0.1,std(k%2?0xe2433f:0xf39a2b,0.55),x-0.15+(k%3)*0.15,0.47,z-0.08+(k>2?0.14:0)); } };
-  const post=g=>{ box(g,2.4,1.9,1.9,cream,0,0.95,0);
-    const roof=new THREE.Mesh(new THREE.ConeGeometry(1.95,1.0,4),std(0x5aa7a0,0.7)); roof.position.set(0,2.4,0); roof.rotation.y=Math.PI/4; roof.scale.set(1,1,0.86); g.add(roof);
-    box(g,0.62,1.1,0.1,std(0x7a5236),0,0.55,0.96); ball(g,0.04,std(0xe8c46a,0.4),0.2,0.55,1.02);
-    for(const x of [-0.75,0.75]){ box(g,0.5,0.46,0.08,winM,x,1.15,0.96); box(g,0.58,0.06,0.12,woodD,x,0.9,0.98); glowPts.push([g,x,1.15,1.05]); }
-    sign(g,'心意郵局','#4f9c95',0,2.05,0.98,1.6);
-    ball(g,0.09,bulbM,0,1.72,1.05); glowPts.push([g,0,1.72,1.1]);   // 門上的小燈
-    const red=std(0xd9443c,0.5); cyl(g,0.24,0.24,0.9,red,1.55,0.55,0.75,14); ball(g,0.24,red,1.55,1.0,0.75); box(g,0.3,0.05,0.06,std(0x2f2a2a),1.55,0.85,0.99); cyl(g,0.07,0.07,0.12,std(0x5b4a3e),1.55,0.06,0.75,8);
-    for(let k=0;k<3;k++){ const e=box(g,0.34,0.03,0.24,std(k%2?0xfff8ea:0xf6e3c4),-1.45+k*0.03,0.04+k*0.035,0.95); e.rotation.y=k*0.3; } };
-  const KINDS=[{ k:'post', name:'心意郵局', build:post, r:1.65 },{ k:'flower', name:'小光花店', build:florist, r:1.45 },{ k:'fruit', name:'微光果子鋪', build:fruit, r:1.45 }];
+  // 心意郵車：綠白配色的復古小郵車，側面朝廣場，車窗晚上會亮
+  const post=g=>{ const green=std(0x4fae62,0.55), greenD=std(0x3d8f4f,0.6), white=std(0xf7f5ef,0.5), tyre=std(0x2b2b2e,0.9), hub=std(0xf2f2ee,0.4), yel=std(0xf4c542,0.4), red=std(0xd9443c,0.5);
+    box(g,2.7,0.62,1.3,green,0,0.62,0);                 // 下半車身
+    box(g,2.6,0.62,1.24,white,0,1.24,0);                // 上半白色車廂
+    box(g,2.66,0.12,1.3,green,0,1.6,0);                 // 車頂
+    box(g,2.4,0.08,1.1,greenD,0,1.7,0);
+    for(const x of [-0.8,-0.15,0.5]){ box(g,0.52,0.36,0.04,winM,x,1.26,0.63); box(g,0.52,0.36,0.04,winM,x,1.26,-0.63); glowPts.push([g,x,1.26,0.7]); }   // 側窗
+    box(g,0.04,0.38,0.9,winM,1.33,1.26,0); box(g,0.04,0.38,0.9,winM,-1.33,1.26,0);   // 前後擋風玻璃
+    box(g,0.08,0.3,0.6,white,1.38,0.62,0);              // 水箱護罩
+    for(const z of [-0.42,0.42]){ const h=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.06,14),yel); h.rotation.z=Math.PI/2; h.position.set(1.37,0.66,z); g.add(h); }   // 圓圓車燈
+    for(const x of [-0.85,0.85]) for(const z of [-0.62,0.62]){ const w=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.24,0.18,16),tyre); w.rotation.x=Math.PI/2; w.position.set(x,0.25,z); g.add(w);
+      const c=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.2,12),hub); c.rotation.x=Math.PI/2; c.position.set(x,0.25,z); g.add(c); }
+    // 車身斜紋（裝飾色塊）
+    const st=box(g,0.18,0.62,0.04,std(0xf2f2ee,0.5),-1.05,0.62,0.66); st.rotation.z=-0.5; const st2=box(g,0.14,0.62,0.04,std(0x5b8fd6,0.5),-0.82,0.62,0.66); st2.rotation.z=-0.5;
+    sign(g,'心意郵車','#3d8f4f',0.25,0.64,0.68,1.25);
+    // 車頂行李架上的信件包裹
+    for(const [x,z,w,col] of [[-0.6,0.1,0.5,0xd9b48a],[0.05,-0.15,0.42,0xf6e3c4],[0.55,0.15,0.36,0xfff8ea]]){ box(g,w,0.24,0.34,std(col,0.7),x,1.86,z); }
+    box(g,0.34,0.04,0.24,std(0xd9443c,0.6),0.05,2.0,-0.15);
+    // 側邊小遮陽棚＋取信櫃台
+    const N=5, aw=1.6/N; for(let i=0;i<N;i++){ const s2=box(g,aw,0.05,0.6,i%2?white:green,-0.4+aw*(i+0.5)-0.4,1.74,0.95); s2.rotation.x=0.35; }
+    box(g,1.2,0.06,0.3,std(0xc89466),0,0.98,0.82); bulbs(g,1.62,1.22,5,1.5);
+    // 旁邊的紅色郵筒
+    cyl(g,0.22,0.22,0.86,red,1.85,0.5,0.55,14); ball(g,0.22,red,1.85,0.93,0.55); box(g,0.28,0.05,0.06,std(0x2f2a2a),1.85,0.8,0.77); cyl(g,0.07,0.07,0.1,std(0x5b4a3e),1.85,0.05,0.55,8); };
+  const KINDS=[{ k:'post', name:'心意郵車', build:post, r:1.75 },{ k:'flower', name:'小光花店', build:florist, r:1.45 },{ k:'fruit', name:'微光果子鋪', build:fruit, r:1.45 }];
   const BAKE=new Map(), hitMat=new THREE.MeshBasicMaterial({ visible:false });
   const bake=g=>{ g.updateMatrixWorld(true); const keep=[];
     g.traverse(m=>{ if(!m.isMesh) return; if(m.userData.keep){ keep.push(m); return; }
@@ -4787,7 +4802,7 @@ async function openStats(){ if(!CLOUD||!CLOUD.admin) return; cardOpen=true; clos
 const SHOP_GOODS={ flower:FLOWER_T.map(f=>[f[0],f[1],f[2]]), fruit:GIFTS.filter(g=>['apple','orange','cake','candy','tea','coffee'].includes(g[0])) };
 const SHOP_TXT={ flower:['🌸 小光花店','挑一束花，帶去給思念的他。每個人每天可以為同一顆水晶獻一次花。'],
   fruit:['🍎 微光果子鋪','帶一份他喜歡的水果或點心過去。每天可以為同一顆水晶放一份。'],
-  post:['✉ 心意郵局','寫一封信寄給島上思念的他。信會掛在他的水晶旁，之後隨時可以回來修改。'] };
+  post:['✉ 心意郵車','寫一封信寄給島上思念的他。郵車會把信送到他的水晶旁，之後隨時可以回來修改。'] };
 let shopNow=null, shopPick=null;
 function openShop(sh){ if(cardOpen) return; closePop(); cardOpen=true; for(const k in keys) keys[k]=false; input.f=input.r=0; shopNow=sh; shopPick=null;
   if(sh.k==='post') renderShopWho(''); else renderShopGoods(); $('acctVeil').classList.add('show'); }
