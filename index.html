@@ -195,6 +195,7 @@
   .say::after{ content:''; position:absolute; left:50%; bottom:-6px; margin-left:-6px; border:6px solid transparent; border-bottom:0; border-top-color:#fffaf2; }
   .say.show{ opacity:1; }
   @keyframes sayIn{ from{ opacity:0; transform:translateY(6px) scale(.96); } to{ opacity:1; transform:none; } }
+  .lblPick{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; opacity:.92; } .lblPick>span{ white-space:nowrap; letter-spacing:.1em; } .lblPick .chips{ margin:0; }
   #actions{ position:fixed; right:18px; bottom:26px; display:flex; flex-direction:column; gap:12px; align-items:flex-end; }
   .act{ display:none; font:inherit; font-size:14px; letter-spacing:.25em; color:var(--gold); padding:13px 20px 13px 24px; border-radius:30px;
     border:1px solid rgba(243,217,164,.45); background:rgba(10,15,26,.55); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
@@ -304,6 +305,9 @@
   #intro p{ font-size:clamp(13px,3.4vw,15px); letter-spacing:.16em; color:rgba(233,220,196,.78); margin:0 0 34px; }
   #enter{ font:inherit; font-size:15px; letter-spacing:.5em; color:#fff1d2; background:rgba(243,217,164,.06); border:1px solid rgba(243,217,164,.5);
     border-radius:30px; padding:13px 30px 13px 40px; cursor:pointer; opacity:.35; transition:opacity .6s, box-shadow .6s; }
+  #quick{ display:none; margin-top:14px; font-size:12px; letter-spacing:.14em; color:rgba(214,226,245,.55); align-items:center; gap:6px; flex-wrap:wrap; justify-content:center; }
+  #intro.back #quick{ display:flex; } #intro.dressing #quick, #intro.picking #quick{ display:none!important; }
+  #quick button{ font:inherit; color:#f3d9a4; background:none; border:0; border-bottom:1px solid rgba(243,217,164,.35); padding:2px 2px; margin:0 6px; cursor:pointer; letter-spacing:.14em; }
   #enter.ready{ opacity:1; box-shadow:0 0 34px rgba(240,190,110,.25); }
   #status{ font-size:11px; letter-spacing:.2em; color:rgba(214,226,245,.4); margin-top:18px; min-height:1.4em; }
   #credit{ position:absolute; bottom:16px; font-family:Georgia,"Noto Serif TC",serif; font-size:10.5px; letter-spacing:.16em; color:rgba(214,226,245,.3); }
@@ -382,6 +386,7 @@
   <p>每一個被記得的生命，都有自己的光。</p>
   <div id="visits"></div>
   <button id="enter">走進園區</button>
+  <div id="quick"><span id="quickWho"></span><button type="button" id="qDress">換個打扮</button><button type="button" id="qIsle">換一座島</button></div>
   <div id="dress"><div class="dt">打扮小光</div>
     <div class="row"><span>披風</span><div class="opts" data-k="cloak"></div></div>
     <div class="row"><span>兜帽</span><div class="opts" data-k="skin"></div></div>
@@ -594,21 +599,23 @@ const CLOUD = FB_CFG ? await (async()=>{
         try{ if(auth.currentUser&&auth.currentUser.isAnonymous){ await U.linkWithCredential(auth.currentUser,U.EmailAuthProvider.credential(a.email,a.pw)); await F.setDoc(F.doc(db,'users',auth.currentUser.uid),{ code:a.code },{ merge:true }); await C.afterLink(); C.profile.code=a.code; return a.code; }
           const cr=await U.createUserWithEmailAndPassword(auth,a.email,a.pw); setUser(cr.user); await F.setDoc(F.doc(db,'users',cr.user.uid),{ code:a.code },{ merge:true }); C.profile={ ...C.profile, code:a.code }; C.touch(true); return a.code; }
         catch(e){ if(e.code!=='auth/email-already-in-use') throw e; } } throw new Error('code'); };
-    C.signCode=async code=>{ const a=C.codeAcct(code); if(!a) throw { code:'kl/format' }; await U.signInWithEmailAndPassword(auth,a.email,a.pw); };
+    // 換帳號前，先把自己在島上的小光收起來（換了帳號之後就沒有權限刪舊的那個了，會留下一個「分身」）
+    C.leaveCb=[]; C.leave=async()=>{ for(const f of C.leaveCb){ try{ await f(); }catch(e){} } };
+    C.signCode=async code=>{ const a=C.codeAcct(code); if(!a) throw { code:'kl/format' }; await C.leave(); await U.signInWithEmailAndPassword(auth,a.email,a.pw); };
     C.signGoogle=async()=>{ const pv=new U.GoogleAuthProvider(); pv.setCustomParameters({ prompt:'select_account' });
       if(auth.currentUser&&auth.currentUser.isAnonymous){ try{ await U.linkWithPopup(auth.currentUser,pv); await C.afterLink(); return; }
-        catch(e){ if(e.code==='auth/credential-already-in-use'){ const cred=U.GoogleAuthProvider.credentialFromError(e); if(cred){ await U.signInWithCredential(auth,cred); return; } } else if(e.code!=='auth/popup-blocked') throw e; } }
-      try{ await U.signInWithPopup(auth,pv); }catch(e){ if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment') await U.signInWithRedirect(auth,pv); else throw e; } };
+        catch(e){ if(e.code==='auth/credential-already-in-use'){ const cred=U.GoogleAuthProvider.credentialFromError(e); if(cred){ await C.leave(); await U.signInWithCredential(auth,cred); return; } } else if(e.code!=='auth/popup-blocked') throw e; } }
+      await C.leave(); try{ await U.signInWithPopup(auth,pv); }catch(e){ if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment') await U.signInWithRedirect(auth,pv); else throw e; } };
     C.linkGoogle=async()=>{ const pv=new U.GoogleAuthProvider(); await U.linkWithPopup(auth.currentUser,pv); await C.afterLink(); };
     C.sendLink=async email=>{ await U.sendSignInLinkToEmail(auth,email,{ url:location.origin+location.pathname, handleCodeInApp:true }); try{ localStorage.setItem('kmlight-email',email); }catch(e){} };
-    C.signOut=async()=>{ await U.signOut(auth); try{ await U.signInAnonymously(auth); }catch(e){} };
+    C.signOut=async()=>{ await C.leave(); await U.signOut(auth); try{ await U.signInAnonymously(auth); }catch(e){} };
     C.ensureUser=async()=>{ if(!C.user){ const cr=await U.signInAnonymously(auth); setUser(cr.user); } };
     // ── 照片：預設壓縮後直接存在紀念資料裡（免費方案可用）；開啟 useStorage 才放 Cloud Storage ──
     C.putPhoto=async(id,dataUrl)=>{ if(!FB_CFG.useStorage) return dataUrl;
       const S=await import(base+'firebase-storage.js'), st=S.getStorage(app), r=S.ref(st,`photos/${C.uid}/${id}-${Date.now().toString(36)}.jpg`);
       await S.uploadString(r,dataUrl,'data_url'); return await S.getDownloadURL(r); };
     // ── 紀念：點亮（搶位置用交易，避免兩個人同時點亮同一顆）、修改、刪除 ──
-    const CONTENT=['kind','name','relation','born','died','memory','quote','photo','avatar'];
+    const CONTENT=['kind','name','relation','born','died','memory','quote','photo','avatar','label'];
     C.saveMem=async(id,data,isNew)=>{
       if(!C.real) throw { code:'kl/login' };
       let photo=data.photo||''; if(photo.startsWith('data:')) photo=await C.putPhoto(id,photo);
@@ -2741,7 +2748,8 @@ function avatarURL(key){ if(_avCache[key]) return _avCache[key]; const N=192, c=
   else if(key==='star'){ for(let i=0;i<40;i++){ circ(Math.random()*N,Math.random()*N,Math.random()*1.6+0.4,'rgba(255,240,200,.8)'); } g.fillStyle='#ffe3a0'; g.beginPath(); for(let i=0;i<10;i++){ const a=i/10*Math.PI*2-Math.PI/2, r=i%2?20:52; i?g.lineTo(C+Math.cos(a)*r,C+Math.sin(a)*r):g.moveTo(C+Math.cos(a)*r,C+Math.sin(a)*r); } g.closePath(); g.fill(); }
   else if(key==='flower'){ for(let i=0;i<6;i++){ const a=i/6*Math.PI*2; circ(C+Math.cos(a)*30,C+Math.sin(a)*30,24,'#f5b8c8'); } circ(C,C,20,'#f7d36b'); }
   return (_avCache[key]=c.toDataURL('image/png')); }
-const titleOf=rec=>rec?((rec.relation||'').trim()||rec.name||''):'';
+// 水晶上方顯示：預設顯示稱謂（沒填稱謂就顯示名字）；點亮時可以改成顯示名字
+const titleOf=rec=>{ if(!rec) return ''; const r=(rec.relation||'').trim(), n=(rec.name||'').trim(); return rec.label==='name'?(n||r):(r||n); };
 // 浮空的圓形照片：照片（實體或虛擬）＋下方一行稱謂；永遠面向鏡頭，大小不跟著水晶縮放
 function setBubble(s,rec){
   if(s.bubble){ scene.remove(s.bubble); s.bubble.material.map&&s.bubble.material.map.dispose(); s.bubble.material.dispose(); s.bubble=null; }
@@ -4154,7 +4162,7 @@ const ASK_STEPS=[
   { q:()=>askData.kind==='thing'?'它叫什麼名字呢？<small>或你平常怎麼稱呼它</small>':askData.kind==='pet'?'牠叫什麼名字呢？':'他叫什麼名字呢？<small>或你平常怎麼叫他</small>',
     body:()=>field('name','input',kindOf(askData.kind).namePh), ok:()=>!!(askData.name||'').trim() },
   { q:()=>askData.kind==='thing'?`「${askData.name}」對你來說是…？<small>可以點選，也可以自己寫</small>`:askData.kind==='pet'?`${askData.name}是你的…？`:`${askData.name}是你的…？<small>可以點選，也可以自己寫</small>`,
-    body:()=>chips(kindOf(askData.kind).rel.map(v=>[v,v]),'relation',true)+'<div class="gap8"></div>'+field('relation','input','或自己寫：例如 二舅、隔壁的阿伯'), ok:()=>true, skip:true },
+    body:()=>chips(kindOf(askData.kind).rel.map(v=>[v,v]),'relation',true)+'<div class="gap8"></div>'+field('relation','input','或自己寫：例如 二舅、隔壁的阿伯')+labelPick(), ok:()=>true, skip:true },
   { q:()=>askData.kind==='thing'?'想記下它的年份嗎？<small>可以跳過</small>':'想記下年份嗎？<small>出生與離開的年份，可以只填一個，也可以跳過</small>',
     body:()=>`<div class="row">${field('born','input','例如 1938','numeric')}<span>—</span>${field('died','input','例如 2021','numeric')}</div>`, ok:()=>true, skip:true },
   { q:()=>`想起${askData.name}時，<br>最先浮現的是什麼畫面？<small>幾句話就好，可以跳過</small>`, body:()=>field('memory','textarea','例如：灶腳的燈總是最早亮起……'), ok:()=>true, skip:true },
@@ -4170,9 +4178,11 @@ const ASK_STEPS=[
     body:()=>`<div class="chips cchips">${CRYSTAL_COLS.map(([n,h],i)=>`<button data-k="color" data-v="${i}" class="${String(askData.color)===String(i)?'on':''}" style="--c:#${h.toString(16).padStart(6,'0')}">${n}</button>`).join('')}</div>` },
   { keys:['visibility'], q:()=>'這顆水晶，要讓來園區的人看見嗎？', body:()=>chips([['public','公開：大家都看得到名字和那句話'],['private','只留給自己']],'visibility'), ok:()=>!!askData.visibility },
   { q:()=>'準備好了嗎？<small>島上會長出一顆屬於他的水晶；之後可以在水晶前點燈、擺上花束</small>',
-    body:()=>`<div class="preview"><b>${esc(askData.name)}</b><em>${esc([askData.relation,yearsText(askData)].filter(Boolean).join('　'))}</em><q>${esc(askData.quote)}</q></div>`, ok:()=>true, last:true },
+    body:()=>`<div class="preview"><small style="display:block;opacity:.6;font-size:12px;margin-bottom:4px">水晶上方顯示「${esc(titleOf({ ...askData, relation:askData.relation||'' }))}」</small><b>${esc(askData.name)}</b><em>${esc([askData.relation,yearsText(askData)].filter(Boolean).join('　'))}</em><q>${esc(askData.quote)}</q></div>`, ok:()=>true, last:true },
 ];
 const esc=t=>String(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function labelPick(){ if(!askData.label) askData.label='relation'; const n=(askData.name||'').trim();
+  return `<div class="gap8"></div><div class="lblPick"><span>水晶上方顯示</span>${chips([['relation','稱謂'],['name',n?`名字・${n}`:'名字']],'label',true)}</div>`; }
 function chips(list,key,fill){ return `<div class="chips">${list.map(([v,l])=>`<button data-k="${key}" data-v="${esc(v)}" data-fill="${fill?1:0}" class="${askData[key]===v?'on':''}">${esc(l)}</button>`).join('')}</div>`; }
 function field(key,type,ph,mode){ const v=esc(askData[key]||''), im=mode?` inputmode="${mode}"`:'';
   return type==='textarea'?`<textarea data-f="${key}" maxlength="140" placeholder="${esc(ph)}">${v}</textarea>`:`<input data-f="${key}" maxlength="${mode?6:24}" placeholder="${esc(ph)}" value="${v}"${im}>`; }
@@ -4206,7 +4216,7 @@ function nextAsk(){
 }
 async function finishAsk(){
   let sp=askSpirit; const d=askData, clean=k=>(d[k]||'').toString().trim(), isNew=!!sp.pending;
-  const rec={ kind:d.kind, name:clean('name'), relation:clean('relation'), born:clean('born'), died:clean('died'), memory:clean('memory'), quote:clean('quote'),
+  const rec={ kind:d.kind, name:clean('name'), relation:clean('relation'), label:d.label==='name'?'name':'relation', born:clean('born'), died:clean('died'), memory:clean('memory'), quote:clean('quote'),
     visibility:d.visibility||'public', color:+d.color||0, photo:d.photo||'', avatar:d.photo?'':(d.avatar||'') };
   if(isNew){ rec.pos=sp.pos; rec.created=new Date().toISOString().slice(0,10); rec.ts=Date.now(); rec.t0=rec.ts; }
   let ok=true;
@@ -5341,6 +5351,7 @@ function styleOther(o,d){ const key=`${d.c|0}|${d.a|0}`; if(o.look===key) return
   const hat=(LOOK.hat[d.a|0]||LOOK.hat[0])[1]; for(const q of o.hats) q.m.visible=q.k===hat; }
 function dropOther(id){ const o=NET.others[id]; if(!o) return; scene.remove(o.root); for(const q of o.mats) q.mat.dispose(); o.tag.remove(); o.say.remove(); delete NET.others[id]; }
 function netData(id,d){ if(!d||id===(CLOUD&&CLOUD.uid)||typeof d.x!=='number') return; let o=NET.others[id];
+  if(!o&&typeof d.t==='number'&&Date.now()+(NET.skew||0)-d.t>45000) return;   // 很久沒動靜（多半是已經離開的分身），不顯示
   if(!o){ o=NET.others[id]=makeOther(id); o.x=o.tx=d.x; o.z=o.tz=d.z; o.h=o.th=d.h||0; o.es=d.es; }
   if(d.es!==o.es){ o.es=d.es; const ph=SAY[d.e|0]; if(ph&&d.es){ o.say.textContent=ph[0]+' '+ph[1]; o.sayT=SAY_SEC; } }
   o.tx=d.x; o.tz=d.z; o.th=d.h||0; o.ts=d.s?1:0; o.mv=d.m||0; o.seen=performance.now(); o.tag.textContent=(d.n||'小光').slice(0,10); styleOther(o,d); }
@@ -5368,6 +5379,8 @@ if(CLOUD&&FB_CFG.databaseURL){ (async()=>{
     const attach=async()=>{ const uid=CLOUD.uid; if(uid===myUid) return; if(myRef){ try{ await D.remove(myRef); }catch(e){} } myUid=uid; myRef=uid?D.ref(rdb,'presence/'+uid):null; last=null;
       if(myRef){ try{ await D.onDisconnect(myRef).remove(); }catch(e){ console.warn('presence',e); } } };
     await attach(); CLOUD.authCb.push(attach);
+    CLOUD.leaveCb.push(async()=>{ if(myRef){ await D.remove(myRef); last=null; } });
+    D.onValue(D.ref(rdb,'.info/serverTimeOffset'),s=>{ NET.skew=s.val()||0; });
     D.onValue(D.ref(rdb,'.info/connected'),s=>{ if(s.val()&&myRef){ D.onDisconnect(myRef).remove().catch(()=>{}); last=null; } });
     NET.send=dt=>{ if(!myRef||!started) return; acc+=dt; beat+=dt; if(MY_SAY.now){ MY_SAY.now=false; acc=1; } if(acc<0.16) return; acc=0;
       const d={ n:lumiShown(), x:Math.round(player.x*100)/100, z:Math.round(player.z*100)/100, h:Math.round(player.heading*100)/100, s:player.sit>0.5?1:0, m:player.speed>0.3?1:0, c:lookState.cloak|0, a:lookState.hat|0, e:MY_SAY.e|0, es:MY_SAY.es|0 };
@@ -5386,7 +5399,7 @@ window.__lit=true; LP(1,'完成');
 $('status').textContent=''; const enter=$('enter'); enter.classList.add('ready');
 // 走進園區 → 選擇從哪座島進入
 const SPAWN={ arch:null, forest:{ x:-6+OX, z:17+OZ } };
-function enterAt(k){ if(started) return; const sp=SPAWN[k];
+function enterAt(k){ if(started) return; const sp=SPAWN[k]; try{ localStorage.setItem('kl_isle',k); }catch(e){}
   if(sp){ player.x=sp.x; player.z=sp.z; player.y=groundY(player.x,player.z); }
   // 一進園區先看到小光的正面（鏡頭在小光前方）；開始走動後鏡頭會自然繞回身後
   cam.yaw=player.heading; cam.sy=0; cam.sp=0; cam.pitchAuto=null; cam.pitch=0.5; cam.distT=cam.dist=NEAR_DIST; for(let i=0;i<6;i++) updateCamera(1);
@@ -5403,10 +5416,17 @@ function buildDress(){
 function syncDress(k){ for(const kk of ['cloak','skin','hat']) document.querySelectorAll(`#dress .opts[data-k="${kk}"] button`).forEach((b,i)=>b.classList.toggle('on',i===lookState[kk]));
   $('dressName').textContent=k?LOOK[k][lookState[k]][0]:`${LOOK.cloak[lookState.cloak][0]}披風・${LOOK.skin[lookState.skin][0]}兜帽`; }
 buildDress();
-enter.addEventListener('click',()=>{ if(started) return; $('intro').classList.add('dressing');
+// 回來的人：記得上次的打扮、名字和島，按「走進園區」直接回到上次的島；要換再按下面的小字
+const ISLE_NAME={ arch:'雲海拱門', forest:'微光森林' };
+let lastIsle=null; try{ lastIsle=localStorage.getItem('kl_isle'); }catch(e){} if(!ISLE_NAME[lastIsle]) lastIsle=null;
+if(lastIsle){ $('intro').classList.add('back'); enter.textContent='回到'+ISLE_NAME[lastIsle]; $('quickWho').textContent=(lumiName||'小光')+'・'; }
+$('qDress').addEventListener('click',e=>{ e.stopPropagation(); openDress(); });
+$('qIsle').addEventListener('click',e=>{ e.stopPropagation(); if(started) return; $('intro').classList.add('picking'); });
+enter.addEventListener('click',()=>{ if(started) return; if(lastIsle){ enterAt(lastIsle); return; } openDress(); });
+function openDress(){ if(started) return; $('intro').classList.add('dressing');
   camSave={ yaw:cam.yaw, pitch:cam.pitch, dist:cam.dist, distT:cam.distT };
   cam.yaw=player.heading; cam.pitch=0.22; cam.dist=cam.distT=LOW?5.4:4.8;
-  camera.setViewOffset(innerWidth,innerHeight,0,innerHeight*0.2,innerWidth,innerHeight); camera.updateProjectionMatrix(); tiltH.enabled=tiltV.enabled=false; });
+  camera.setViewOffset(innerWidth,innerHeight,0,innerHeight*0.2,innerWidth,innerHeight); camera.updateProjectionMatrix(); tiltH.enabled=tiltV.enabled=false; $('lumiName').value=lumiName||''; }
 $('dressOk').addEventListener('click',()=>{ setLumiName($('lumiName').value); if(camSave){ Object.assign(cam,camSave); camSave=null; } camera.clearViewOffset(); camera.updateProjectionMatrix(); tiltH.enabled=tiltV.enabled=tiltOn&&!smoothOn;
   const it=$('intro'); it.classList.remove('dressing'); it.classList.add('picking'); });
 document.querySelectorAll('#pick [data-isl]').forEach(b=>b.addEventListener('click',()=>enterAt(b.dataset.isl)));
